@@ -1,0 +1,84 @@
+From f165a06ce523beca8597a93614b11ecc3a41f9cf Mon Sep 17 00:00:00 2001
+From: Anand Moon <linux.amoon@gmail.com>
+Date: Mon, 22 Aug 2016 13:12:51 -0400
+Subject: [PATCH 09/12] amlogic:hdmi:cec: use a simple waitqueue
+
+use a simple waitqueue insted of waitqueue for RT kernel
+---
+ drivers/amlogic/hdmi/hdmi_tx_20/amlogic_cec.c | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/amlogic/hdmi/hdmi_tx_20/amlogic_cec.c b/drivers/amlogic/hdmi/hdmi_tx_20/amlogic_cec.c
+index 81d2fb9..d0289c8 100644
+--- a/drivers/amlogic/hdmi/hdmi_tx_20/amlogic_cec.c
++++ b/drivers/amlogic/hdmi/hdmi_tx_20/amlogic_cec.c
+@@ -83,14 +83,14 @@ struct cec_rx_list {
+ 
+ struct cec_rx_struct {
+     spinlock_t lock;
+-    wait_queue_head_t waitq;
++    struct swait_head waitq;
+     atomic_t state;
+     struct list_head list;
+ };
+ 
+ struct cec_tx_struct {
+     spinlock_t lock;
+-    wait_queue_head_t waitq;
++    struct swait_head waitq;
+     atomic_t state;
+ };
+ 
+@@ -305,7 +305,7 @@ int cec_node_init(struct hdmitx_dev* hdmitx_device)
+                     spin_unlock_irqrestore(&cec_rx_struct.lock, spin_flags);
+ 
+                     amlogic_cec_log_dbg("trigger libCEC\n");
+-                    wake_up_interruptible(&cec_rx_struct.waitq);
++                    swake_up_interruptible(&cec_rx_struct.waitq);
+                 }
+             }
+         }
+@@ -338,7 +338,7 @@ static irqreturn_t amlogic_cec_irq_handler(int irq, void *dummy)
+                 amlogic_cec_set_tx_state(STATE_DONE);
+                 break;
+         }
+-        wake_up_interruptible(&cec_tx_struct.waitq);
++        swake_up_interruptible(&cec_tx_struct.waitq);
+     }
+ 
+     if (rx_msg_state == RX_DONE)
+@@ -366,7 +366,7 @@ static irqreturn_t amlogic_cec_irq_handler(int irq, void *dummy)
+         amlogic_cec_set_rx_state(STATE_DONE);
+         spin_unlock_irqrestore(&cec_rx_struct.lock, spin_flags);
+ 
+-        wake_up_interruptible(&cec_rx_struct.waitq);
++        swake_up_interruptible(&cec_rx_struct.waitq);
+     }
+ 
+     return IRQ_HANDLED;
+@@ -502,7 +502,7 @@ static ssize_t amlogic_cec_write(struct file *file, const char __user *buffer,
+ 
+     amlogic_cec_write_hw(data, count);
+ 
+-    if (wait_event_interruptible_timeout(cec_tx_struct.waitq,
++    if (swait_event_interruptible_timeout(cec_tx_struct.waitq,
+                 atomic_read(&cec_tx_struct.state) != STATE_TX, 2 * HZ) <= 0)
+     {
+         amlogic_cec_log_dbg("error during wait on state change, resetting\n");
+@@ -679,11 +679,11 @@ static int __init amlogic_cec_init(void)
+     cec_logicaddr_set(0xf);
+ 
+ 
+-    init_waitqueue_head(&cec_rx_struct.waitq);
++    init_swait_head(&cec_rx_struct.waitq);
+ 
+     spin_lock_init(&cec_rx_struct.lock);
+ 
+-    init_waitqueue_head(&cec_tx_struct.waitq);
++    init_swait_head(&cec_tx_struct.waitq);
+ 
+     spin_lock_init(&cec_tx_struct.lock);
+ 
+-- 
+2.7.4
+

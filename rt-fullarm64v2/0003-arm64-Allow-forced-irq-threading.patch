@@ -1,0 +1,32 @@
+From 651d08c7fffe5c7f101c8674dbf54fc4bb5f581c Mon Sep 17 00:00:00 2001
+From: Anders Roxell <anders.roxell@linaro.org>
+Date: Thu, 11 Aug 2016 07:37:17 -0400
+Subject: [PATCH 03/12] arm64: Allow forced irq threading
+
+Now its safe to allow forced interrupt threading for arm64,
+all timer interrupts and the perf interrupt are marked NO_THREAD, as is
+the case with arch/arm: da0ec6f ARM: 7814/2: Allow forced irq threading
+
+Suggested-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Signed-off-by: Anders Roxell <anders.roxell@linaro.org>
+Signed-off-by: Steven Rostedt <rostedt@goodmis.org>
+Signed-off-by: Anand Moon <linux.amoon@gmail.com>
+---
+ arch/arm64/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index 5075bbb..d6d28bc 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -57,6 +57,7 @@ config ARM64
+ 	select HAVE_PERF_USER_STACK_DUMP
+ 	select HAVE_SYSCALL_TRACEPOINTS
+ 	select IRQ_DOMAIN
++	select IRQ_FORCED_THREADING
+ 	select MODULES_USE_ELF_RELA
+ 	select NO_BOOTMEM
+ 	select OF
+-- 
+2.7.4
+

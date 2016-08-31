@@ -1,0 +1,104 @@
+From c9dd82bbaf88f7a85206aed235d2a5577bda80a8 Mon Sep 17 00:00:00 2001
+From: Anand Moon <linux.amoon@gmail.com>
+Date: Thu, 11 Aug 2016 10:06:34 -0400
+Subject: [PATCH 06/12] amports: fix the build error with DEFINE_SPINLOCK
+
+Signed-off-by: Anand Moon <linux.amoon@gmail.com>
+---
+ drivers/amlogic/amports/esparser.c | 4 ++--
+ drivers/amlogic/amports/psparser.c | 4 ++--
+ drivers/amlogic/amports/rmparser.c | 2 +-
+ drivers/amlogic/amports/tsdemux.c  | 6 +++---
+ 4 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/amlogic/amports/esparser.c b/drivers/amlogic/amports/esparser.c
+index f3933ad..4368e6e 100644
+--- a/drivers/amlogic/amports/esparser.c
++++ b/drivers/amlogic/amports/esparser.c
+@@ -466,7 +466,7 @@ Err_1:
+ void esparser_audio_reset(struct stream_buf_s *buf)
+ {
+ 	ulong flags;
+-	DEFINE_SPINLOCK(lock);
++	__DEFINE_SPINLOCK(lock);
+ 
+ 	spin_lock_irqsave(&lock, flags);
+ 
+@@ -697,7 +697,7 @@ ssize_t esparser_write(struct file *file,
+ void esparser_sub_reset(void)
+ {
+ 	ulong flags;
+-	DEFINE_SPINLOCK(lock);
++	__DEFINE_SPINLOCK(lock);
+ 	u32 parser_sub_start_ptr;
+ 	u32 parser_sub_end_ptr;
+ 
+diff --git a/drivers/amlogic/amports/psparser.c b/drivers/amlogic/amports/psparser.c
+index a794706..d536322 100644
+--- a/drivers/amlogic/amports/psparser.c
++++ b/drivers/amlogic/amports/psparser.c
+@@ -1058,7 +1058,7 @@ void psparser_change_sid(unsigned int sid)
+ void psparser_audio_reset(void)
+ {
+ 	ulong flags;
+-	DEFINE_SPINLOCK(lock);
++	__DEFINE_SPINLOCK(lock);
+ 
+ 	spin_lock_irqsave(&lock, flags);
+ 
+@@ -1086,7 +1086,7 @@ void psparser_audio_reset(void)
+ void psparser_sub_reset(void)
+ {
+ 	ulong flags;
+-	DEFINE_SPINLOCK(lock);
++	__DEFINE_SPINLOCK(lock);
+ 	u32 parser_sub_start_ptr;
+ 	u32 parser_sub_end_ptr;
+ 
+diff --git a/drivers/amlogic/amports/rmparser.c b/drivers/amlogic/amports/rmparser.c
+index 1ed65e5..0ea0800 100644
+--- a/drivers/amlogic/amports/rmparser.c
++++ b/drivers/amlogic/amports/rmparser.c
+@@ -307,7 +307,7 @@ void rm_set_vasid(u32 vid, u32 aid)
+ void rm_audio_reset(void)
+ {
+ 	ulong flags;
+-	DEFINE_SPINLOCK(lock);
++	__DEFINE_SPINLOCK(lock);
+ 
+ 	spin_lock_irqsave(&lock, flags);
+ 
+diff --git a/drivers/amlogic/amports/tsdemux.c b/drivers/amlogic/amports/tsdemux.c
+index deaf7e4..3cf9d9b 100644
+--- a/drivers/amlogic/amports/tsdemux.c
++++ b/drivers/amlogic/amports/tsdemux.c
+@@ -67,7 +67,7 @@ static int demux_skipbyte;
+ static struct tsdemux_ops *demux_ops;
+ static irq_handler_t demux_handler;
+ static void *demux_data;
+-static DEFINE_SPINLOCK(demux_ops_lock);
++static __DEFINE_SPINLOCK(demux_ops_lock);
+ 
+ void tsdemux_set_ops(struct tsdemux_ops *ops)
+ {
+@@ -1072,7 +1072,7 @@ void tsdemux_change_sid(unsigned int sid)
+ void tsdemux_audio_reset(void)
+ {
+ 	ulong flags;
+-	DEFINE_SPINLOCK(lock);
++	__DEFINE_SPINLOCK(lock);
+ 
+ 	spin_lock_irqsave(&lock, flags);
+ 
+@@ -1098,7 +1098,7 @@ void tsdemux_audio_reset(void)
+ void tsdemux_sub_reset(void)
+ {
+ 	ulong flags;
+-	DEFINE_SPINLOCK(lock);
++	__DEFINE_SPINLOCK(lock);
+ 	u32 parser_sub_start_ptr;
+ 	u32 parser_sub_end_ptr;
+ 
+-- 
+2.7.4
+

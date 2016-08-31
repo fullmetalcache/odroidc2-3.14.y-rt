@@ -1,0 +1,53 @@
+From 876f3746575efdeccb6b7954e06e2d28ac655937 Mon Sep 17 00:00:00 2001
+From: Anand Moon <linux.amoon@gmail.com>
+Date: Mon, 22 Aug 2016 13:20:31 -0400
+Subject: [PATCH 11/12] display:vout: Convert blocking notifier chain to SRCU
+
+Convert blocking notifier chain to SRCU for video out
+---
+ drivers/amlogic/display/vout/vout_notify.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/amlogic/display/vout/vout_notify.c b/drivers/amlogic/display/vout/vout_notify.c
+index fa6bd59..0976f13 100644
+--- a/drivers/amlogic/display/vout/vout_notify.c
++++ b/drivers/amlogic/display/vout/vout_notify.c
+@@ -27,7 +27,7 @@
+ /* Local Headers */
+ #include "vout_log.h"
+ 
+-static BLOCKING_NOTIFIER_HEAD(vout_notifier_list);
++SRCU_NOTIFIER_HEAD(vout_notifier_list);
+ static DEFINE_MUTEX(vout_mutex);
+ 
+ static struct vout_module_s vout_module = {
+@@ -44,7 +44,7 @@ static struct vout_module_s vout_module = {
+  */
+ int vout_register_client(struct notifier_block *nb)
+ {
+-	return blocking_notifier_chain_register(&vout_notifier_list, nb);
++	return srcu_notifier_chain_register(&vout_notifier_list, nb);
+ }
+ EXPORT_SYMBOL(vout_register_client);
+ 
+@@ -54,7 +54,7 @@ EXPORT_SYMBOL(vout_register_client);
+  */
+ int vout_unregister_client(struct notifier_block *nb)
+ {
+-	return blocking_notifier_chain_unregister(&vout_notifier_list, nb);
++	return srcu_notifier_chain_unregister(&vout_notifier_list, nb);
+ }
+ EXPORT_SYMBOL(vout_unregister_client);
+ 
+@@ -64,7 +64,7 @@ EXPORT_SYMBOL(vout_unregister_client);
+  */
+ int vout_notifier_call_chain(unsigned long val, void *v)
+ {
+-	return blocking_notifier_call_chain(&vout_notifier_list, val, v);
++	return srcu_notifier_call_chain(&vout_notifier_list, val, v);
+ }
+ EXPORT_SYMBOL_GPL(vout_notifier_call_chain);
+ 
+-- 
+2.7.4
+
